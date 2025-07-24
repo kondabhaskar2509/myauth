@@ -1,0 +1,11 @@
+@import "tailwindcss";
+
+
+@layer components {
+  .loginlabel{
+    @apply block text-lg font-semibold mb-2 text-black;
+  }
+  .logininput {
+    @apply w-full border border-gray-300 rounded-md p-3 text-black focus:outline-none focus:ring-2 focus:ring-blue-400
+  }
+}
