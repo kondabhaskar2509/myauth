@@ -31,6 +31,7 @@ const CreateClient = () => {
     e.preventDefault();
     const ClientId = generateClientCredentials(16);
     const ClientSecret = generateClientCredentials(32);
+    const Code = generateClientCredentials(48);
 
     fetch("http://localhost:3000/createclient", {
       method: "POST",
@@ -45,6 +46,7 @@ const CreateClient = () => {
         clientId: ClientId,
         clientSecret: ClientSecret,
         email: activeuser,
+        code: Code,
       }),
     })
       .then((res) => res.json())

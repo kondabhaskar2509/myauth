@@ -22,13 +22,12 @@ MongoClient.connect(url, {
     process.exit(1);
   })
   .then(async (client) => {
-    const oauthcollection = client.db("booking").collection("oauthdata");
-    const oauthtokenscollection = client.db("booking").collection("oauthtoken");
-    const oauthlogincollection = client.db("booking").collection("oauthlogin");
+    const clientcollection = client.db("booking").collection("clientdata");
+    const myauthcollection = client.db("booking").collection("myauthusers");
    
 
-    setupOAuth(app, oauthcollection ,oauthtokenscollection ,oauthlogincollection);
-    setupAuth(app, oauthlogincollection);
+    setupOAuth(app, clientcollection ,myauthcollection);
+    setupAuth(app, myauthcollection);
 
     app.listen(port, () => {
       console.log(`Server listening on port ${port}`);

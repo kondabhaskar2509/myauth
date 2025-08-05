@@ -2,32 +2,30 @@ import React, { useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
 
 const Authorize = () => {
-  const [searchParams] = useSearchParams();
-  useEffect(() => {
+    const [searchParams] = useSearchParams();
     const clientId = searchParams.get("client_id");
-    const clientSecret = searchParams.get("client_secret");
-    const redirecturl = searchParams.get("redirect_url");
-    const email = searchParams.get("email");
-    if (!clientId || !clientSecret || !redirecturl || !email) return;
+    const redirecturi = searchParams.get("redirect_uri");
+
+    console.log(redirecturi)
+    
+    if (!clientId || !redirecturi) return;
 
     fetch("http://localhost:3000/authorize", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         clientId,
-        clientSecret,
-        redirecturl,
-        email,
       }),
     })
       .then((res) => res.json())
       .then((data) => {
-        if (data.code) {
           console.log("Authorization code received:", data.code);
-          window.location.href = `${redirecturl}?code=${data.code}`;
-        }
+          window.location.href = `${redirecturi}?code=${data.code}`;
+      })
+      .catch(err => {
+        console.error("Authorization error:", err);
       });
-  }, [searchParams]);
+
 
   return (
     <div>

@@ -1,12 +1,12 @@
-function setupAuth(app, oauthlogincollection) {
+function setupAuth(app, myauthcollection) {
   app.post("/signup", async (req, res) => {
     try {
       const { name, email, password, confirmPassword } = req.body;
-      const user = await oauthlogincollection.findOne({ email });
+      const user = await myauthcollection.findOne({ email });
       if (user) {
         return res.json({ status: "error", error: "User already exists" });
       }
-      const result = await oauthlogincollection.insertOne({
+      const result = await myauthcollection.insertOne({
         name,
         email,
         password,
@@ -26,7 +26,7 @@ function setupAuth(app, oauthlogincollection) {
   app.post("/login", async (req, res) => {
     try {
       const { email, password } = req.body;
-      const user = await oauthlogincollection.findOne({ email });
+      const user = await myauthcollection.findOne({ email });
       if (!user) {
         return res.json({ status: "error", error: "User not found" });
       }
@@ -53,7 +53,7 @@ function setupAuth(app, oauthlogincollection) {
     try {
       const { email } = req.query;
 
-      const user = await oauthlogincollection.findOne({ email });
+      const user = await myauthcollection.findOne({ email });
       if(user) {
       res.json({ name: user.name, email: user.email });
 

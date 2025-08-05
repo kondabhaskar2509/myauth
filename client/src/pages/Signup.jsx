@@ -93,7 +93,7 @@ const Signup = () => {
           <div className="relative">
             <input
               id="password"
-              type={showPassword ? "text" : "password"}
+              type="password"
               placeholder="Enter your password"
               className="logininput"
               required
@@ -109,7 +109,7 @@ const Signup = () => {
           <div className="relative">
             <input
               id="confirmPassword"
-              type={showConfirmPassword ? "text" : "password"}
+              type="password"
               placeholder="Confirm password"
               className="logininput"
               required

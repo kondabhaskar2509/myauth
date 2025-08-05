@@ -1,10 +1,9 @@
-import crypto from "crypto";
+import { ObjectId } from "mongodb";
 
 function setupOAuth(
   app,
-  oauthcollection,
-  oauthtokenscollection,
-  oauthlogincollection
+  clientcollection,
+  myauthcollection
 ) {
   app.post("/createclient", async (req, res) => {
     try {
@@ -16,13 +15,14 @@ function setupOAuth(
         clientId,
         clientSecret,
         email,
+        code,
       } = req.body;
 
-      const client = await oauthcollection.findOne({ appname, email });
+      const client = await clientcollection.findOne({ appname, email });
       if (client) {
         return res.json({ status: "error", error: "Client already exists" });
       }
-      const result = await oauthcollection.insertOne({
+      const result = await clientcollection.insertOne({
         appname,
         homepageurl,
         redirecturl,
@@ -30,6 +30,7 @@ function setupOAuth(
         clientId,
         clientSecret,
         email,
+        code,
       });
       res.json({ status: "success", id: result.insertedId });
     } catch (err) {
@@ -44,7 +45,7 @@ function setupOAuth(
       if (!email) {
         return res.status(400).json({ error: "Missing email" });
       }
-      const clients = await oauthcollection.find({ email }).toArray();
+      const clients = await clientcollection.find({ email }).toArray();
       res.json(clients);
     } catch (err) {
       res.status(500).json({ error: "Failed to fetch clients" });
@@ -55,7 +56,7 @@ function setupOAuth(
     try {
       const { clientId } = req.query;
 
-      const client = await oauthcollection.findOne({ clientId });
+      const client = await clientcollection.findOne({ clientId });
       if (client) {
         res.json(client);
       }
@@ -66,41 +67,34 @@ function setupOAuth(
 
   app.post("/authorize", async (req, res) => {
     try {
-      const { clientId, clientSecret, redirecturl, email } = req.body;
-      if (!clientId || !clientSecret || !redirecturl || !email) {
-        return res
-          .status(400)
-          .json({
-            error: "Missing clientId, clientSecret, redirecturl, or email",
-          });
+      const { clientId } = req.body;
+      if (!clientId) {
+        console.log("Missing clientId");
+        return res.status(400).json({
+          error: "Missing clientId",
+        });
       }
 
-      const client = await oauthcollection.findOne({
+      const client = await clientcollection.findOne({
         clientId,
-        clientSecret,
-        redirecturl,
       });
       if (!client) {
+        console.log("Invalid client credentials");
         return res.status(401).json({ error: "Invalid client credentials" });
       }
-
- 
-      const user = await oauthlogincollection.findOne({ email });
+      const email = client.email;
+      const user = await myauthcollection.findOne({ email });
       if (!user) {
+        console.log("User not found");
         return res.status(404).json({ error: "User not found" });
       }
 
-      const code = crypto.randomBytes(32).toString("hex");
+      await clientcollection.updateOne(
+        { clientId: clientId },
+        { $set: { accesstoken: user._id } } 
+      );
 
-      await oauthtokenscollection.insertOne({
-        code,
-        clientId,
-        clientSecret,
-        userId: user._id,
-        createdAt: new Date(),
-      });
-
-      res.json({ code, expires_in: 600 });
+      res.json({ code : client.code });
     } catch (err) {
       console.error("Error in /authorize:", err);
       res.status(500).json({ error: "Failed to authorize" });
@@ -109,44 +103,45 @@ function setupOAuth(
 
   app.post("/getaccesstoken", async (req, res) => {
     try {
-      const { client_id, client_secret, code } = req.body;
-      if (!client_id || !client_secret || !code) {
+      const { clientid, clientsecret, code } = req.body;
+      if (!clientid || !clientsecret || !code) {
+        console.log("Missing client_id, client_secret, or code");
         return res
           .status(400)
           .json({ error: "Missing client_id, client_secret, or code" });
       }
-      const tokenDoc = await oauthtokenscollection.findOne({
+      const token = await clientcollection.findOne({
         code,
-        clientId: client_id,
-        clientSecret: client_secret,
+        clientId: clientid,
+        clientSecret: clientsecret,
       });
-      if (!tokenDoc) {
+      if (!token) {
+        console.log("Invalid code or client credentials");
         return res
           .status(401)
           .json({ error: "Invalid code or client credentials" });
       }
-      res.json({ accesstoken: tokenDoc.userId });
+      res.json({ accesstoken: token.accesstoken });
     } catch (err) {
+      console.error("Error in /getaccesstoken:", err);
       res.status(500).json({ error: "Failed to get access token" });
     }
   });
 
   app.post("/getuserdetails", async (req, res) => {
     try {
-      const authHeader = req.headers.authorization;
-      if (!authHeader || !authHeader.startsWith("Bearer ")) {
-        return res
-          .status(400)
-          .json({ error: "Missing or invalid Authorization header" });
+      const { accesstoken } = req.body;
+      if (!accesstoken) {
+        return res.status(400).json({ error: "Missing access token" });
       }
-      const userId = authHeader.split(" ")[1];
-      const user = await oauthlogincollection.findOne({ _id: userId });
+      const userId = new ObjectId(accesstoken);
+      const user = await myauthcollection.findOne({ _id: userId });
       if (!user) {
         return res.status(404).json({ error: "User not found" });
       }
       res.json({ name: user.name, email: user.email });
     } catch (err) {
-      res.status(500).json({ error: "Failed to get user details" });
+      res.status(500).json({ error: "Failed to fetch user details" });
     }
   });
 }
