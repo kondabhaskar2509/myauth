@@ -1,10 +1,6 @@
 import { ObjectId } from "mongodb";
 
-function setupOAuth(
-  app,
-  clientcollection,
-  myauthcollection
-) {
+function setupOAuth(app,clientcollection,myauthcollection) {
   app.post("/createclient", async (req, res) => {
     try {
       const {

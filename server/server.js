@@ -16,17 +16,19 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-MongoClient.connect(url, {
-  maxPoolSize: 50,
-  wtimeoutMS: 2500,
-})
-  .catch((err) => {
-    console.error(err.stack);
-    process.exit(1);
-  })
-  .then(async (client) => {
-    const clientcollection = client.db("booking").collection("clientdata");
-    const myauthcollection = client.db("booking").collection("myauthusers");
+
+(async () => {
+  try {
+    const client = await MongoClient.connect(url, {
+      maxPoolSize: 50,
+      wtimeoutMS: 2500,
+    });
+
+    console.log("Connected to MongoDB");
+
+    const db = client.db("booking");
+    const clientcollection = db.collection("clientdata");
+    const myauthcollection = db.collection("myauthusers");
 
     setupOAuth(app, clientcollection, myauthcollection);
     setupAuth(app, myauthcollection);
@@ -34,31 +36,8 @@ MongoClient.connect(url, {
     app.listen(port, () => {
       console.log(`Server listening on port ${port}`);
     });
-  });
-
-
-
-// (async () => {
-//   try {
-//     const client = await MongoClient.connect(url, {
-//       maxPoolSize: 50,
-//       wtimeoutMS: 2500,
-//     });
-
-//     console.log("Connected to MongoDB");
-
-//     const db = client.db("booking");
-//     const clientcollection = db.collection("clientdata");
-//     const myauthcollection = db.collection("myauthusers");
-
-//     setupOAuth(app, clientcollection, myauthcollection);
-//     setupAuth(app, myauthcollection);
-
-//     app.listen(port, () => {
-//       console.log(`Server listening on port ${port}`);
-//     });
-//   } catch (err) {
-//     console.error("Mongo connection error:", err);
-//     process.exit(1);
-//   }
-// })();
+  } catch (err) {
+    console.error("Mongo connection error:", err);
+    process.exit(1);
+  }
+})();
