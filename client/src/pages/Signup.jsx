@@ -1,6 +1,7 @@
 import React, { useContext, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { AppContext } from "../context/AppContext";
+import { BACKEND } from "../config/env";
 
 
 
@@ -31,7 +32,7 @@ const Signup = () => {
     if (password !== confirmPassword) {
       setError("Password And Confirm Password do not match");
     } else {
-      fetch("http://localhost:3000/signup", {
+      fetch(BACKEND + "/signup", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ name, email, password, confirmPassword }),

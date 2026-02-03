@@ -1,6 +1,7 @@
 import React, { useContext, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { AppContext } from "../context/AppContext";
+import { BACKEND } from "../config/env";
 
 
 const Login = () => {
@@ -27,7 +28,7 @@ const Login = () => {
   const handleLogin = () => {
     setError("");
     setSuccess("");
-    fetch("http://localhost:3000/login", {
+    fetch(BACKEND + "/login", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ email, password }),
