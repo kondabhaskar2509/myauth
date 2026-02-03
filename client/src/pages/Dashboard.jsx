@@ -1,7 +1,6 @@
 import React, { useEffect, useState, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import { AppContext } from "../context/AppContext";
-import { BACKEND } from "../config/env";
 
 const Dashboard = () => {
   const { activeuser } = useContext(AppContext);
@@ -10,11 +9,11 @@ const Dashboard = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    fetch(`${BACKEND}/userdetails?email=${activeuser}`)
+    fetch(`${process.env.BACKEND}/userdetails?email=${activeuser}`)
       .then((res) => res.json())
       .then((data) => setUser(data));
 
-    fetch(`${BACKEND}/clients?email=${activeuser}`)
+    fetch(`${process.env.BACKEND}/clients?email=${activeuser}`)
       .then((res) => res.json())
       .then((data) => setClients(data));
   }, [activeuser]);

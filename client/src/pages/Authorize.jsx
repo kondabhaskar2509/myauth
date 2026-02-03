@@ -1,6 +1,5 @@
 import React, { useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
-import { BACKEND } from "../config/env";
 
 const Authorize = () => {
     const [searchParams] = useSearchParams();
@@ -11,7 +10,7 @@ const Authorize = () => {
     
     if (!clientId || !redirecturi) return;
 
-    fetch(BACKEND + "/authorize", {
+    fetch(process.env.BACKEND + "/authorize", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({

@@ -1,7 +1,6 @@
 import React, { useState, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import { AppContext } from "../context/AppContext";
-import { BACKEND } from "../config/env";
 
 const CreateClient = () => {
   const navigate = useNavigate();
@@ -34,7 +33,7 @@ const CreateClient = () => {
     const ClientSecret = generateClientCredentials(32);
     const Code = generateClientCredentials(48);
 
-    fetch(BACKEND + "/createclient", {
+    fetch(process.env.BACKEND + "/createclient", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

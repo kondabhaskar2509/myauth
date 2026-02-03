@@ -1,7 +1,6 @@
 import React, { useEffect, useState, useContext } from "react";
 import { AppContext } from "../context/AppContext";
 import { useParams } from "react-router-dom";
-import { BACKEND } from "../config/env";
 
 const ClientDetails = () => {
   const { id } = useParams();
@@ -11,7 +10,7 @@ const ClientDetails = () => {
   const clientId = id;
 
   useEffect(() => {
-    fetch(`${BACKEND}/client?clientId=${clientId}`)
+    fetch(`${process.env.BACKEND}/client?clientId=${clientId}`)
       .then((res) => res.json())
       .then((data) => setClient(data));
   }, [activeuser, clientId]);
